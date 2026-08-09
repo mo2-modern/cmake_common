@@ -9,12 +9,15 @@ include(${CMAKE_CURRENT_LIST_DIR}/mo2_utils.cmake)
 #    for corresponding /W flags (ON is All) (default ON)
 # \param:EXTERNAL enable warnings for external libraries, possible values are
 #   the same as warnings, but ON is 3 (default 1)
+# \param:WERROR treat warnings as errors, i.e. /WX (default OFF). opt-in per
+#   target: only enable it on a target that is already warning clean
 #
 function(mo2_configure_warnings TARGET)
-	cmake_parse_arguments(MO2 "" "WARNINGS;EXTERNAL" "" ${ARGN})
+	cmake_parse_arguments(MO2 "" "WARNINGS;EXTERNAL;WERROR" "" ${ARGN})
 
 	mo2_set_if_not_defined(MO2_WARNINGS ON)
 	mo2_set_if_not_defined(MO2_EXTERNAL 1)
+	mo2_set_if_not_defined(MO2_WERROR OFF)
 
 	if (${MO2_WARNINGS} STREQUAL "ON")
 		set(MO2_WARNINGS "All")
@@ -37,6 +40,12 @@ function(mo2_configure_warnings TARGET)
 			target_compile_options(${TARGET}
 				PRIVATE "/external:anglebrackets" "/external:W${MO2_EXTERNAL}")
 		endif()
+	endif()
+
+	# opt-in per target: a target only takes WERROR once it is actually warning
+	# clean, so that one noisy target cannot block the whole tree
+	if (${MO2_WERROR})
+		target_compile_options(${TARGET} PRIVATE "/WX")
 	endif()
 
 endfunction()
@@ -213,6 +222,7 @@ endfunction()
 #    for corresponding /W flags (ON is All) (default ON)
 # \param:EXTERNAL_WARNINGS enable warnings for external libraries, possible values are
 #   the same as warnings, but ON is 3 (default 1)
+# \param:WERROR treat warnings as errors, i.e. /WX (default OFF)
 # \param:PERMISSIVE permissive mode (default OFF)
 # \param:BIGOBJ enable bigobj (default OFF)
 # \param:CLI enable C++/CLR (default OFF)
@@ -222,7 +232,7 @@ endfunction()
 #
 function(mo2_configure_target TARGET)
 	cmake_parse_arguments(MO2 "SOURCE_TREE;NO_SOURCES"
-		"WARNINGS;EXTERNAL_WARNINGS;PERMISSIVE;BIGOBJ;CLI;TRANSLATIONS;AUTOMOC"
+		"WARNINGS;EXTERNAL_WARNINGS;WERROR;PERMISSIVE;BIGOBJ;CLI;TRANSLATIONS;AUTOMOC"
 		"EXTRA_TRANSLATIONS"
 		${ARGN})
 

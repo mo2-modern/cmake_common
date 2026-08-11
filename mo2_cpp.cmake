@@ -202,8 +202,14 @@ function(mo2_configure_msvc TARGET)
 	get_property(CURRENT_STARTUP_PROJECT
 		DIRECTORY ${PROJECT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT)
 
+	# DEBUG, not STATUS: Visual Studio reads VS_STARTUP_PROJECT from the top-level
+	# source directory only. When a repository is built on its own that is what
+	# PROJECT_SOURCE_DIR names, so this works and is worth keeping. Inside a
+	# superbuild every repository is a subdirectory instead, so each of these ~20
+	# assignments is silently discarded and announcing them at STATUS only tells the
+	# reader that something took effect when nothing did.
 	if (NOT CURRENT_STARTUP_PROJECT)
-		message(STATUS "MO2: Setting startup project to " ${TARGET} ".")
+		message(DEBUG "MO2: Setting startup project to " ${TARGET} ".")
 		set_property(DIRECTORY ${PROJECT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${TARGET})
 	endif()
 

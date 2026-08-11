@@ -29,8 +29,6 @@ list(GET MO2_QT_VERSION_LIST 1 MO2_QT_VERSION_MINOR)
 list(GET MO2_QT_VERSION_LIST 2 MO2_QT_VERSION_PATCH)
 unset(MO2_QT_VERSION_LIST)
 
-message(STATUS "[MO2] Qt version: ${MO2_QT_VERSION} (${MO2_QT_VERSION_MAJOR}, ${MO2_QT_VERSION_MINOR}, ${MO2_QT_VERSION_PATCH})")
-
 mo2_set_if_not_defined(MO2_PYTHON_VERSION "3.14")
 
 # TODO: there is no prebuilt for 6.7.3, so we stay on 6.7.1 for now
@@ -45,9 +43,21 @@ else()
     mo2_set_if_not_defined(MO2_SIP_VERSION "6.8.6")
 endif()
 
-message(STATUS "[MO2] Python version: ${MO2_PYTHON_VERSION}")
-message(STATUS "[MO2] PyQt version: ${MO2_PYQT_VERSION}")
-message(STATUS "[MO2] SIP version: ${MO2_SIP_VERSION}")
+# announce the resolved versions once per configure rather than once per scope.
+# MO2_VERSIONS_INCLUDED above is a normal variable, so it is scope-local: every
+# repository that calls find_package(mo2-cmake) re-runs this file, which is correct
+# because each scope genuinely needs these variables re-set. Only the reporting is
+# redundant -- it printed these four lines 27 times in the superbuild. A global
+# property is the only guard that spans sibling directory scopes.
+get_property(_mo2_versions_announced GLOBAL PROPERTY MO2_VERSIONS_ANNOUNCED)
+if (NOT _mo2_versions_announced)
+	set_property(GLOBAL PROPERTY MO2_VERSIONS_ANNOUNCED TRUE)
+	message(STATUS "[MO2] Qt version: ${MO2_QT_VERSION} (${MO2_QT_VERSION_MAJOR}, ${MO2_QT_VERSION_MINOR}, ${MO2_QT_VERSION_PATCH})")
+	message(STATUS "[MO2] Python version: ${MO2_PYTHON_VERSION}")
+	message(STATUS "[MO2] PyQt version: ${MO2_PYQT_VERSION}")
+	message(STATUS "[MO2] SIP version: ${MO2_SIP_VERSION}")
+endif()
+unset(_mo2_versions_announced)
 
 # mark as included
 set(MO2_VERSIONS_INCLUDED TRUE)

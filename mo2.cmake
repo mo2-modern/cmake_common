@@ -24,9 +24,14 @@ set(Python_FIND_VIRTUALENV STANDARD)
 
 # this set the imported location of targets for missing configurations - this silents
 # many CMP0111 warnings from CMake
-set(CMAKE_MAP_IMPORTED_CONFIG_MINSIZEREL MinSizeRel RelWithDebInfo Release None)
-set(CMAKE_MAP_IMPORTED_CONFIG_RELWITHDEBINFO RelWithDebInfo Release MinSizeRel None)
-set(CMAKE_MAP_IMPORTED_CONFIG_RELEASE Release RelWithDebInfo MinSizeRel None)
+#
+# the last entry must be the empty string, which means "fall back to the un-suffixed
+# IMPORTED_LOCATION" - a literal None is looked up as IMPORTED_LOCATION_NONE and fails
+# for imported tools that only carry the un-suffixed property (Qt::uic, Qt::qmlcachegen,
+# Python::Interpreter, ...)
+set(CMAKE_MAP_IMPORTED_CONFIG_MINSIZEREL MinSizeRel RelWithDebInfo Release "")
+set(CMAKE_MAP_IMPORTED_CONFIG_RELWITHDEBINFO RelWithDebInfo Release MinSizeRel "")
+set(CMAKE_MAP_IMPORTED_CONFIG_RELEASE Release RelWithDebInfo MinSizeRel "")
 
 # allow setting folder property on targets for better organization in VS
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
